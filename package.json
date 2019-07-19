@@ -1,0 +1,29 @@
+{
+  "name": "reddit-ng-stream",
+  "version": "1.0.0",
+  "description": "A stream of images from reddit",
+  "main": "src/index.tsx",
+  "scripts": {
+    "start": "parcel ./src/index.html",
+    "build": "parcel build ./src/index.html"
+  },
+  "keywords": [
+    "reddit",
+    "stream",
+    "react"
+  ],
+  "author": "rhermes",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/react": "^16.8.23",
+    "@types/react-dom": "^16.8.4",
+    "parcel-bundler": "^1.12.3",
+    "tslint": "^5.18.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.5.3"
+  },
+  "dependencies": {
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
+  }
+}
