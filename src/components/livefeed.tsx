@@ -3,27 +3,34 @@ import { Submission } from "../models/submission";
 
 interface Props {
   subreddits: ReadonlyArray<string>;
+  rating?: string;
 }
 
 export function LiveFeed(props: Props) {
   const [subs, setSubs] = useState<ReadonlyArray<Submission>>([]);
 
   useEffect(() => {
-    console.log("creating eventsource");
+    console.log("creating websocket");
 
-    let url = "http://stream.pushshift.io";
+    let urlParts: string[] = [];
+
+    let url = "ws://localhost:8222/ws";
     const subFilter = props.subreddits.join(",");
     if (subFilter !== "") {
-      url += "?subreddit=" + subFilter;
+      urlParts.push("subreddits=" + subFilter);
     }
 
-    const s = new EventSource(url);
+    if (props.rating !== undefined) {
+      urlParts.push("rating=" + props.rating);
+    }
+    if (urlParts.length > 0) {
+      url += "?" + urlParts.join("&");
+    }
+    const s = new WebSocket(url);
 
-    s.addEventListener("rs", (ev: MessageEvent | Event) => {
-      if (!("data" in ev)) {
-        throw Error("Not a message type");
-      }
-      const rs: Submission = JSON.parse(ev.data);
+    s.addEventListener("message", m => {
+      const jr: Submission = JSON.parse(m.data);
+      console.log({ sub: jr.subreddit, title: jr.title });
     });
 
     return () => {
