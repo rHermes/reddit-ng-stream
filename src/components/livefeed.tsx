@@ -1,20 +1,51 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { TransitionGroup } from "react-transition-group";
+import { style } from "typestyle";
 import { Submission } from "../models/submission";
+import { SubmissionsTable } from "./submissions-table";
 
 interface Props {
   subreddits: ReadonlyArray<string>;
   rating?: string;
 }
 
+const mageStyle = style({
+  $nest: {
+    "&-enter": {
+      opacity: 0
+    },
+    "&-enter-active": {
+      opacity: 1,
+      transition: "opacity 500ms ease-in"
+    }
+  }
+});
+
 export function LiveFeed(props: Props) {
   const [subs, setSubs] = useState<ReadonlyArray<Submission>>([]);
+
+  const savedSubs = useRef<ReadonlyArray<Submission>>(subs);
+
+  useEffect(() => {
+    savedSubs.current = subs;
+  }, [subs]);
 
   useEffect(() => {
     console.log("creating websocket");
 
-    let urlParts: string[] = [];
+    const urlParts: string[] = [];
 
-    let url = "ws://localhost:8222/ws";
+    let loc = window.location;
+    let new_uri = "";
+    if (loc.protocol === "https:") {
+      new_uri = "wss:";
+    } else {
+      new_uri = "ws:";
+    }
+    new_uri += "//" + loc.host;
+    new_uri += loc.pathname + "ws";
+
+    let url = new_uri;
     const subFilter = props.subreddits.join(",");
     if (subFilter !== "") {
       urlParts.push("subreddits=" + subFilter);
@@ -29,12 +60,18 @@ export function LiveFeed(props: Props) {
     const s = new WebSocket(url);
 
     s.addEventListener("message", m => {
-      const jr: Submission = JSON.parse(m.data);
-      console.log({ sub: jr.subreddit, title: jr.title });
+      try {
+        const messages: string[] = m.data.split("\n");
+        const jsubs: Submission[] = messages.map(v => JSON.parse(v));
+        setSubs([...savedSubs.current, ...jsubs]);
+      } catch (e) {
+        console.log("We have the error: " + e);
+        console.log(m.data);
+      }
     });
 
     return () => {
-      console.log("closing eventsource");
+      console.log("closing websocket");
       s.close();
     };
   }, [props.subreddits.join(",")]);
@@ -46,6 +83,8 @@ export function LiveFeed(props: Props) {
           <li key={r}>/r/{r}</li>
         ))}
       </ul>
+
+      <SubmissionsTable subs={subs.slice(-30)} />
     </div>
   );
 }
