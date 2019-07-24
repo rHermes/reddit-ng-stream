@@ -3,6 +3,7 @@ import { TransitionGroup } from "react-transition-group";
 import { style } from "typestyle";
 import { Submission } from "../models/submission";
 import { SubmissionsTable } from "./submissions-table";
+import { PrettySubmissionsTable } from "./pretty-submissions-table";
 
 interface Props {
   subreddits: ReadonlyArray<string>;
@@ -84,7 +85,7 @@ export function LiveFeed(props: Props) {
         ))}
       </ul>
 
-      <SubmissionsTable subs={subs.slice(-30)} />
+      <PrettySubmissionsTable subs={subs.slice(-30)} />
     </div>
   );
 }

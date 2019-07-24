@@ -1,7 +1,7 @@
 import React from "react";
-import { style, keyframes } from "typestyle";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
+import { keyframes, style } from "typestyle";
 import { Submission } from "../models/submission";
-import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 interface TableProps {
   subs: ReadonlyArray<Submission>;
